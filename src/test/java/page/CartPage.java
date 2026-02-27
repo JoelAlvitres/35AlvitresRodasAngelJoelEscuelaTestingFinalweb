@@ -2,51 +2,61 @@ package page;
 
 import net.serenitybdd.core.pages.PageObject;
 import net.serenitybdd.core.pages.WebElementFacade;
+import org.openqa.selenium.By;
 import org.openqa.selenium.support.FindBy;
 
 import java.util.List;
 
 public class CartPage extends PageObject {
 
+    @FindBy(id = "checkout")
+    private WebElementFacade checkoutBtn;
+
+    @FindBy(id = "continue-shopping")
+    private WebElementFacade continueShoppingBtn;
+
     @FindBy(css = ".title")
     private WebElementFacade pageTitle;
 
-    @FindBy(id = "checkout")
-    private WebElementFacade checkoutButton;
-
-    @FindBy(id = "continue-shopping")
-    private WebElementFacade continueShoppingButton;
-
-    @FindBy(css = ".cart_item")
-    private List<WebElementFacade> cartItems;
-
-    @FindBy(css = ".shopping_cart_badge")
-    private WebElementFacade cartBadge;
-
     public boolean estaEnCarrito() {
-        return pageTitle.waitUntilVisible().getText().equals("Your Cart");
-    }
-
-    public int cantidadItemsEnCarrito() {
-        return cartItems == null ? 0 : cartItems.size();
+        return pageTitle.isVisible() && pageTitle.getText().trim().equalsIgnoreCase("Your Cart");
     }
 
     public void clickCheckout() {
-        checkoutButton.waitUntilClickable().click();
+        checkoutBtn.waitUntilClickable().click();
     }
 
     public void clickContinuarComprando() {
-        continueShoppingButton.waitUntilClickable().click();
+        continueShoppingBtn.waitUntilClickable().click();
     }
 
-    public String obtenerBadgeCarrito() {
-        return cartBadge.isVisible() ? cartBadge.getText() : "0";
+    public int obtenerCantidadProductos() {
+        // Los ítems del carrito siempre tienen .cart_item
+        List<WebElementFacade> items = findAll(By.cssSelector(".cart_item"));
+        return items.size();
     }
 
-    // Remueve el primer item que exista (robusto)
-    public void removerPrimerItemSiExiste() {
-        if (cantidadItemsEnCarrito() == 0) return;
-        // Dentro del primer cart_item hay un botón Remove con class btn_secondary / btn_small
-        cartItems.get(0).thenFind("button.btn_secondary").waitUntilClickable().click();
+    public boolean carritoEstaVacio() {
+        return obtenerCantidadProductos() == 0;
+    }
+
+    public void removerProducto(String nombreProducto) {
+        // Ubica el item por nombre y remueve con selector robusto
+        WebElementFacade item = findBy(
+                "//div[contains(@class,'cart_item')]" +
+                        "[.//div[contains(@class,'inventory_item_name') and normalize-space()='" + nombreProducto + "']]"
+        ).waitUntilVisible();
+
+        item.find(By.cssSelector("button.btn_secondary, button.btn_inventory"))
+                .waitUntilClickable()
+                .click();
+
+        // Espera a que desaparezca del DOM
+        waitForCondition().until(driver ->
+                findAll(
+                        "//div[contains(@class,'cart_item')]" +
+                                "[.//div[contains(@class,'inventory_item_name') and normalize-space()='" + nombreProducto + "']]"
+                ).isEmpty()
+        );
     }
 }

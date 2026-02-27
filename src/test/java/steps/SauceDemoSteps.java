@@ -2,8 +2,8 @@ package steps;
 
 import net.serenitybdd.annotations.Step;
 import page.CartPage;
-import page.CheckoutOverviewPage;
-import page.SauceLoginPage;
+import page.CheckoutPage;
+import page.LoginPage;
 import page.ProductsPage;
 import utils.CredencialesHelper;
 
@@ -16,7 +16,6 @@ public class SauceDemoSteps {
     private CartPage cartPage;
     private CheckoutPage checkoutPage;
 
-    // ---------- Helpers ----------
     private void assertContainsIgnoreCase(String actual, String expected) {
         assertThat(actual).containsIgnoringCase(expected);
     }
@@ -24,7 +23,7 @@ public class SauceDemoSteps {
     // ---------- Base ----------
     @Step("Abrir la página de SauceDemo")
     public void abrirSauceDemo() {
-        loginPage.open();
+        loginPage.openUrl("https://www.saucedemo.com/");
         assertThat(loginPage.getDriver().getCurrentUrl()).contains("saucedemo");
     }
 
@@ -41,20 +40,19 @@ public class SauceDemoSteps {
         loginPage.login(u, p);
     }
 
-    @Step("Verificar que la página de productos está visible")
+    @Step("Verificar página de productos")
     public void verificarPaginaProductos() {
         assertThat(productsPage.estaPaginaProductosVisible())
-                .as("Se esperaba estar en Products")
+                .as("Se esperaba estar en la página Products")
                 .isTrue();
     }
 
-    @Step("Verificar mensaje de error en login")
+    @Step("Verificar error de login")
     public void verificarMensajeErrorLogin(String mensajeEsperado) {
-        String actual = loginPage.obtenerMensajeError();
-        assertContainsIgnoreCase(actual, mensajeEsperado);
+        assertContainsIgnoreCase(loginPage.obtenerMensajeError(), mensajeEsperado);
     }
 
-    @Step("Verificar que se muestra mensaje de error en login")
+    @Step("Verificar que se muestra error de login")
     public void verificarSeVisualizaMensajeErrorLogin() {
         assertThat(loginPage.seVisualizaMensajeError())
                 .as("Se esperaba un error visible en login")
@@ -67,7 +65,7 @@ public class SauceDemoSteps {
         productsPage.agregarProductoAlCarrito(nombreProducto);
     }
 
-    @Step("Remover producto del carrito desde Products")
+    @Step("Remover producto desde Products")
     public void removerProductoDelCarrito(String nombreProducto) {
         productsPage.removerProductoDelCarrito(nombreProducto);
     }
@@ -83,16 +81,18 @@ public class SauceDemoSteps {
         assertThat(cartPage.estaEnCarrito()).isTrue();
     }
 
-    @Step("Verificar cantidad de productos en carrito (badge)")
+    @Step("Verificar badge del carrito = {0}")
     public void verificarCantidadProductosEnCarrito(int cantidad) {
-        int badge = productsPage.obtenerCantidadProductosEnCarrito();
-        assertThat(badge).isEqualTo(cantidad);
+        assertThat(productsPage.obtenerCantidadProductosEnCarrito())
+                .as("Badge del carrito debería ser " + cantidad)
+                .isEqualTo(cantidad);
     }
 
-    @Step("Verificar cantidad de productos visibles")
+    @Step("Verificar cantidad de productos visibles = {0}")
     public void verificarCantidadProductosVisibles(int cantidad) {
-        int visibles = productsPage.obtenerCantidadProductosVisibles();
-        assertThat(visibles).isEqualTo(cantidad);
+        assertThat(productsPage.obtenerCantidadProductosVisibles())
+                .as("Cantidad de productos visibles debería ser " + cantidad)
+                .isEqualTo(cantidad);
     }
 
     // ---------- Carrito ----------
@@ -101,7 +101,7 @@ public class SauceDemoSteps {
         assertThat(cartPage.estaEnCarrito()).isTrue();
     }
 
-    @Step("Verificar cantidad de productos en CartPage")
+    @Step("Verificar cantidad de productos en carrito page = {0}")
     public void verificarCantidadProductosEnCartPage(int cantidad) {
         assertThat(cartPage.obtenerCantidadProductos()).isEqualTo(cantidad);
     }
@@ -149,18 +149,18 @@ public class SauceDemoSteps {
         assertThat(checkoutPage.estaOrdenCompletada()).isTrue();
     }
 
-    @Step("Verificar error checkout")
+    @Step("Verificar error de checkout")
     public void verificarMensajeErrorCheckout(String mensajeEsperado) {
         assertThat(checkoutPage.seVisualizaMensajeError()).isTrue();
         assertContainsIgnoreCase(checkoutPage.obtenerMensajeError(), mensajeEsperado);
     }
 
-    @Step("Verificar que está en Checkout Info")
+    @Step("Verificar pantalla Checkout Info")
     public void verificarEstaEnCheckoutInfo() {
         assertThat(checkoutPage.estaEnPaginaCheckoutInfo()).isTrue();
     }
 
-    @Step("Verificar que está en Checkout Overview")
+    @Step("Verificar pantalla Checkout Overview")
     public void verificarEstaEnCheckoutOverview() {
         assertThat(checkoutPage.estaEnPaginaCheckoutOverview()).isTrue();
     }
@@ -169,5 +169,26 @@ public class SauceDemoSteps {
     public void volverAProductos() {
         checkoutPage.volverAProductos();
         assertThat(productsPage.estaPaginaProductosVisible()).isTrue();
+    }
+    @Step("Ingresar solo nombre")
+    public void ingresarSoloNombre(String nombre) {
+        checkoutPage.ingresarNombre(nombre);
+    }
+
+    @Step("Ingresar solo apellido")
+    public void ingresarSoloApellido(String apellido) {
+        checkoutPage.ingresarApellido(apellido);
+    }
+
+    @Step("Ingresar solo código postal")
+    public void ingresarSoloCodigoPostal(String codigoPostal) {
+        checkoutPage.ingresarCodigoPostal(codigoPostal);
+    }
+
+    @Step("Cancelar checkout")
+    public void cancelarCheckout() {
+        checkoutPage.clickCancelar();
+        // normalmente vuelve al carrito
+        assertThat(cartPage.estaEnCarrito()).isTrue();
     }
 }

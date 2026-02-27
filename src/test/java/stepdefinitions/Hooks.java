@@ -2,14 +2,15 @@ package stepdefinitions;
 
 import io.cucumber.java.Before;
 import net.serenitybdd.annotations.Steps;
+import steps.SauceDemoSteps;
 
 public class Hooks {
 
     @Steps
-    SauceDemoStepDefinitions sauceSteps;
+    SauceDemoSteps sauce;
 
-    @Before("@saucedemo")
-    public void abrirPaginaAntes() {
-        sauceSteps.abrirPagina();
+    @Before("@SAUCEDEMO")
+    public void abrirSauceDemoAntesDeCadaEscenario() {
+        sauce.abrirSauceDemo();
     }
 }
