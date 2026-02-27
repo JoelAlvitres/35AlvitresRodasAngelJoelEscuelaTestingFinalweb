@@ -1,0 +1,16 @@
+cat > .gitignore << 'EOF'
+# Maven
+/target/
+*.log
+
+# IDEs
+/.idea/
+/*.iml
+.classpath
+.project
+.settings/
+
+# OS
+.DS_Store
+Thumbs.db
+EOF
